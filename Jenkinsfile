@@ -14,6 +14,8 @@ pipeline {
         triggers {
           pollSCM('H/5 * * * *') // Runs every 5 minutes OR use webhook for better performance
         }
+    
+    stages {
 
         stage('Build Docker Image') {
             steps {
@@ -55,3 +57,4 @@ pipeline {
             }
         }
     }
+}
