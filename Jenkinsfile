@@ -46,13 +46,17 @@ pipeline {
                 script {
                     sh '''
                     ssh -o StrictHostKeyChecking=no -i /var/lib/jenkins/.ssh/key.pem $EC2_USER@$EC2_HOST <<EOF
+                    aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $REPO_URL
                     docker pull $REPO_URL:$IMAGE_TAG
                     docker stop flask-app || true
                     docker rm flask-app || true
                     docker run -d --name flask-app -p 5000:5000 $REPO_URL:$IMAGE_TAG
                     EOF
                     '''
+                    }
                 }
+            }
+
             }
         }
 
