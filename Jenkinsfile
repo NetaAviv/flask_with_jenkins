@@ -45,17 +45,19 @@ pipeline {
 
         stage('Deploy to EC2') {
             steps {
-                script {
-                    sh '''
-                    ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST <<EOF
-                    docker pull $REPO_URL:$IMAGE_TAG
-                    docker stop flask-app || true
-                    docker rm flask-app || true
-                    docker run -d --name flask-app -p 5000:5000 $REPO_URL:$IMAGE_TAG
-                    EOF
-                    '''
+                withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY')]) {
+                    script {
+                        sh '''
+                        ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST <<EOF
+                        docker pull $REPO_URL:$IMAGE_TAG
+                        docker stop flask-app || true
+                        docker rm flask-app || true
+                        docker run -d --name flask-app -p 5000:5000 $REPO_URL:$IMAGE_TAG
+                        EOF
+                        '''
+                        }
+                    }
                 }
-            }
         }
     }
 }
