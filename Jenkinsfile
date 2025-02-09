@@ -5,7 +5,7 @@ pipeline {
         AWS_REGION = 'us-east-1' // Change to your AWS region
         ECR_REPO = 'neta/flaskapp'
         IMAGE_TAG = 'latest'
-        AWS_ACCOUNT_ID = 'your-aws-account-id'
+        AWS_ACCOUNT_ID = '767828746131'
         REPO_URL = "767828746131.dkr.ecr.us-east-1.amazonaws.com/neta/flaskapp"
         EC2_USER = 'ec2-user' // Change if using Ubuntu (e.g., 'ubuntu')
         EC2_HOST = '54.211.5.200'
@@ -27,11 +27,12 @@ pipeline {
 
         stage('Login to AWS ECR') {
             steps {
-                script {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: '767828746131']]) {
                     sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $REPO_URL'
+                    }
                 }
             }
-        }
+
 
         stage('Push Image to AWS ECR') {
             steps {
