@@ -2,21 +2,20 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION = 'us-east-1' // Change to your AWS region
+        AWS_REGION = 'us-east-1'
         ECR_REPO = 'neta/flaskapp'
         IMAGE_TAG = 'latest'
         AWS_ACCOUNT_ID = '767828746131'
         REPO_URL = "767828746131.dkr.ecr.us-east-1.amazonaws.com/neta/flaskapp"
-        EC2_USER = 'ec2-user' // Change if using Ubuntu (e.g., 'ubuntu')
+        EC2_USER = 'ec2-user'
         EC2_HOST = '54.211.5.200'
     }
 
-        triggers {
-          pollSCM('H/5 * * * *') // Runs every 5 minutes OR use webhook for better performance
-        }
-    
-    stages {
+    triggers {
+        pollSCM('H/5 * * * *') // Runs every 5 minutes OR use webhook
+    }
 
+    stages {
         stage('Build Docker Image') {
             steps {
                 script {
@@ -27,12 +26,11 @@ pipeline {
 
         stage('Login to AWS ECR') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'SSH_ID']]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS_Credentials']]) {
                     sh 'aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $REPO_URL'
-                    }
                 }
             }
-
+        }
 
         stage('Push Image to AWS ECR') {
             steps {
@@ -55,9 +53,9 @@ pipeline {
                         docker run -d --name flask-app -p 5000:5000 $REPO_URL:$IMAGE_TAG
                         EOF
                         '''
-                        }
                     }
                 }
+            }
         }
     }
 }
