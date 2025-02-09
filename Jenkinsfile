@@ -43,19 +43,18 @@ pipeline {
 
         stage('Deploy to EC2') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'SSH_ID', keyFileVariable: 'SSH_KEY')]) {
-                    script {
-                        sh '''
-                        ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST <<EOF
-                        docker pull $REPO_URL:$IMAGE_TAG
-                        docker stop flask-app || true
-                        docker rm flask-app || true
-                        docker run -d --name flask-app -p 5000:5000 $REPO_URL:$IMAGE_TAG
-                        EOF
-                        '''
-                    }
+                script {
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no -i /var/lib/jenkins/.ssh/key.pem $EC2_USER@$EC2_HOST <<EOF
+                    docker pull $REPO_URL:$IMAGE_TAG
+                    docker stop flask-app || true
+                    docker rm flask-app || true
+                    docker run -d --name flask-app -p 5000:5000 $REPO_URL:$IMAGE_TAG
+                    EOF
+                    '''
                 }
             }
         }
+
     }
 }
